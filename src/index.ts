@@ -110,14 +110,14 @@ const insertFiles = async () => {
                 views: 0,
             };
 
-            console.info(`INFO: inserting new post ${document.title}`);
+            console.log(`INFO: inserting new post ${document.title}`);
             try {
                 await createPost(client, document);
             } catch (error) {
                 throw new Error(error as string);
             }
         } else {
-            console.info(`INFO: updating contents for ${existingDocument.title}`);
+            console.log(`INFO: updating contents for ${existingDocument.title}`);
             try {
                 await updatePost(client, existingDocument.id, postContent);
             } catch (error) {

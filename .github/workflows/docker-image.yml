@@ -1,0 +1,27 @@
+name: Docker Build And Push
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      working-directory: .
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: docker build --build-arg DATABASE_URL=$DATABASE_URL . --file Dockerfile --tag maneeshwije/blog
+      
+    - name: Log in to DockerHub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Push Docker images to DockerHub
+      run: docker push maneeshwije/blog

@@ -20,8 +20,13 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: docker build --build-arg DATABASE_URL=$DATABASE_URL . --file Dockerfile --tag maneeshwije/blog
       
-    - name: Log in to DockerHub
-      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-    - name: Push Docker images to DockerHub
-      run: docker push maneeshwije/blog
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push Docker images to DockerHub
+        run: docker push maneeshwije/blog

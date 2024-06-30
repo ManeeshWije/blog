@@ -1,0 +1,7 @@
+<div class="text-white flex m-auto items-center justify-center flex-col">
+    <div id="articles" class="flex flex-col text-center">
+        {{#each articles}}
+            <a href="/articles/{{ id }}" class="no-underline-visited cursor-pointer font-bold no-underline-visited relative text-xl w-fit block after:block after:content-[''] after:absolute after:h-[3px] after:bg-white after:w-full after:scale-x-0 after:hover:scale-x-100 after:transition after:duration-300 after:origin-center">{{ title }}</a>
+        {{/each}}
+    </div>
+</div>

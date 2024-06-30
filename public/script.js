@@ -5,8 +5,6 @@ const metadata = document.getElementById("metadata");
 const articlePathRegex = /^\/articles\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 const currentPath = window.location.pathname;
 
-console.log(currentPath);
-
 if (currentPath === "/") {
     search.style.display = "flex";
 }

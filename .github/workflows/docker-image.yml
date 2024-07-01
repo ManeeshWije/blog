@@ -30,4 +30,4 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Docker images to DockerHub
-        run: docker push maneeshwije/blog
+        run: docker push maneeshwije/blog:latest

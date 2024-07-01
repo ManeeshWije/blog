@@ -18,7 +18,9 @@ jobs:
       working-directory: .
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: docker build --build-arg DATABASE_URL=$DATABASE_URL . --file Dockerfile --tag maneeshwije/blog
+      run: |
+        docker build --build-arg DATABASE_URL=$DATABASE_URL -t maneeshwije/blog .
+        docker images  # Optional: List Docker images for debugging
 
   push:
     runs-on: ubuntu-latest
@@ -30,4 +32,4 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Docker images to DockerHub
-        run: docker push maneeshwije/blog:latest
+        run: docker push maneeshwije/blog

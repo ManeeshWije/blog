@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
+import { Logestic } from "logestic";
 
 import { marked, Token } from "marked";
 import { markedHighlight } from "marked-highlight";
@@ -129,10 +130,20 @@ const insertFiles = async () => {
 
 await insertFiles();
 
+const logging = new Logestic().use(["method", "path", "ip", "body", "query", "referer", "userAgent"]).format({
+    onSuccess({ method, path, ip, body, query, referer, userAgent }) {
+        return `${method} ${path} was called by ip ${ip} and handled without server error. BODY: ${body} - QUERY: ${query} - REFERER: ${referer} - USERAGENT: ${userAgent}`;
+    },
+    onFailure({ request, error, code }) {
+        return `Oops, ${error} was thrown with code: ${code} on request: ${request}`;
+    },
+});
+
 const app = new Elysia()
     .use(html())
     .use(cors())
     .use(staticPlugin())
+    .use(logging)
     .get("/", async () => {
         const articles = await getAllPosts(client);
         articles.sort((a, b) => b.views - a.views);

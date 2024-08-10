@@ -1,9 +1,5 @@
-import { Elysia, t } from "elysia";
-import { cors } from "@elysiajs/cors";
-import { html } from "@elysiajs/html";
-import { staticPlugin } from "@elysiajs/static";
-import { Logestic } from "logestic";
-
+import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 import { marked, Token } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
@@ -130,55 +126,38 @@ const insertFiles = async () => {
 
 await insertFiles();
 
-const logging = new Logestic().use(["method", "path", "ip", "body", "query", "referer", "userAgent"]).format({
-    onSuccess({ method, path, ip, body, query, referer, userAgent }) {
-        return `${method} ${path} was called by ip ${ip} and handled without server error. BODY: ${body} - QUERY: ${query} - REFERER: ${referer} - USERAGENT: ${userAgent}`;
-    },
-    onFailure({ request, error, code }) {
-        return `Oops, ${error} was thrown with code: ${code} on request: ${request}`;
-    },
+const app = new Hono();
+
+app.use("/public/*", serveStatic({ root: "./" }));
+app.use("/favicon.ico", serveStatic({ path: "./favicon.ico" }));
+
+app.get("/", async (c) => {
+    const articles = await getAllPosts(client);
+    articles.sort((a, b) => b.views - a.views);
+    return c.html(base({ articles }));
 });
 
-const app = new Elysia()
-    .use(html())
-    .use(cors())
-    .use(staticPlugin())
-    .use(logging)
-    .get("/", async () => {
-        const articles = await getAllPosts(client);
-        articles.sort((a, b) => b.views - a.views);
-        return base({ articles });
-    })
-    .get(
-        "/articles/:id",
-        async ({ params: { id } }) => {
-            const article = await getPost(client, id);
-            return base({
-                title: article.title,
-                views: article.views,
-                author: article.author,
-                date: new Date(article.created_at).toLocaleDateString(),
-                content: article.content,
-            });
-        },
-        {
-            params: t.Object({
-                id: t.String(),
-            }),
-        },
-    )
-    .post(
-        "/search",
-        async ({ body }) => {
-            const articles = await searchForPost(client, body.search);
-            return partialArticles({ articles });
-        },
-        {
-            body: t.Object({
-                search: t.String(),
-            }),
-        },
-    )
-    .listen(8080);
+app.get("/articles/:id", async (c) => {
+    const article = await getPost(client, c.req.param("id"));
+    return c.html(
+        base({
+            title: article.title,
+            views: article.views,
+            author: article.author,
+            date: new Date(article.created_at).toLocaleDateString(),
+            content: article.content,
+        }),
+    );
+});
 
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
+app.post("/search", async (c) => {
+    const body = await c.req.parseBody();
+    const searchText = body.search as string;
+    const articles = await searchForPost(client, searchText);
+    return c.html(partialArticles({ articles }));
+});
+
+export default {
+    port: 8080,
+    fetch: app.fetch,
+};

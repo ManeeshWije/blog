@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { logger } from 'hono/logger'
 import { serveStatic } from "hono/bun";
 import { marked, Token } from "marked";
 import { markedHighlight } from "marked-highlight";
@@ -130,6 +131,7 @@ const app = new Hono();
 
 app.use("/public/*", serveStatic({ root: "./" }));
 app.use("/favicon.ico", serveStatic({ path: "./favicon.ico" }));
+app.use(logger())
 
 app.get("/", async (c) => {
     const articles = await getAllPosts(client);
